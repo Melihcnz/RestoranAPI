@@ -24,6 +24,74 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Ana sayfa için karşılama mesajı
+app.get('/', (req, res) => {
+  res.send(`
+    <html>
+      <head>
+        <title>Restoran API</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+          }
+          h1 {
+            color: #2c3e50;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+          }
+          h2 {
+            color: #3498db;
+            margin-top: 30px;
+          }
+          code {
+            background-color: #f8f8f8;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-family: monospace;
+          }
+          ul {
+            padding-left: 20px;
+          }
+          .endpoint {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+          }
+        </style>
+      </head>
+      <body>
+        <h1>Restoran Yönetim Sistemi API</h1>
+        <p>API başarıyla çalışıyor! Restoran yönetim sistemi için RESTful API servisi.</p>
+        
+        <h2>Temel Endpointler</h2>
+        <div class="endpoint">
+          <code>POST /api/auth/register</code> - Yeni kullanıcı kaydı
+        </div>
+        <div class="endpoint">
+          <code>POST /api/auth/login</code> - Kullanıcı girişi
+        </div>
+        <div class="endpoint">
+          <code>GET /api/products</code> - Tüm ürünleri listele
+        </div>
+        <div class="endpoint">
+          <code>GET /api/categories</code> - Tüm kategorileri listele
+        </div>
+        
+        <h2>Daha Fazla Bilgi</h2>
+        <p>Tüm API dokümantasyonu ve detaylı açıklamalar için GitHub repo'muzu ziyaret edin.</p>
+        <p>Geliştirici: Melih Canaz</p>
+        <p>Sürüm: 1.0.0</p>
+      </body>
+    </html>
+  `);
+});
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);

@@ -4,25 +4,60 @@ Restoran yönetim sistemi için geliştirilmiş kapsamlı bir REST API.
 
 ## Özellikler
 
-- **Kullanıcı Yönetimi**: Giriş, kayıt, rol tabanlı yetkilendirme (admin, personel, müşteri)
-- **Masa Yönetimi**: Masa durumları, kapasite, bölümler
-- **Sipariş Sistemi**: Masa ve paket siparişleri, ödeme durumu takibi
-- **Ürün Yönetimi**: Kategoriler, fiyatlar, stok durumu
-- **Raporlama**: Satış, sipariş ve müşteri analizleri
+- **Kullanıcı Yönetimi**: Kayıt, giriş, rol tabanlı yetkilendirme
+- **Masa Yönetimi**: Masaları ekleme, düzenleme, durum takibi
+- **Menü Yönetimi**: Kategoriler, ürünler, fiyatlar
+- **Sipariş Yönetimi**: Sipariş oluşturma, takip, güncelleme
+- **Ödeme İşlemleri**: Sipariş ödemesi, fatura oluşturma
+- **Stok Takibi**: Malzeme yönetimi, ürün-malzeme ilişkisi, stok hareketi
+- **Bildirim Sistemi**: Önemli olaylar için bildirim oluşturma
+
+## Teknolojiler
+
+- **Node.js** - Sunucu tarafı JavaScript çalışma ortamı
+- **Express** - Web framework
+- **MongoDB** - NoSQL veritabanı
+- **Mongoose** - MongoDB için ODM (Object Document Mapper)
+- **JWT** - JSON Web Token tabanlı kimlik doğrulama
+- **bcrypt** - Şifre hashleme
 
 ## Kurulum
 
+### Gereksinimler
+
+- Node.js (v14+)
+- MongoDB (yerel veya Atlas)
+
+### Adımlar
+
+1. Projeyi klonlayın:
+
 ```bash
-# Bağımlılıkları yükle
+git clone https://github.com/melihcnz/restoran-api.git
+cd restoran-api
+```
+
+2. Bağımlılıkları yükleyin:
+
+```bash
 npm install
+```
 
-# .env dosyasını yapılandır
+3. `.env` dosyası oluşturun:
+
+```bash
 cp .env.example .env
+```
 
-# Geliştirme modunda çalıştır
+4. `.env` dosyasındaki değişkenleri kendi ortamınıza göre düzenleyin.
+
+5. Uygulamayı başlatın:
+
+```bash
+# Geliştirme modu
 npm run dev
 
-# Üretim modunda çalıştır
+# Üretim modu
 npm start
 ```
 
@@ -59,367 +94,101 @@ CORS_ORIGIN=*
 
 ## API Dökümantasyonu
 
-### Kimlik Doğrulama
+### Ana Endpointler
 
-- `POST /api/auth/register` - Yeni kullanıcı kaydı
-  ```json
-  {
-    "name": "Melih Canaz",
-    "email": "melih@gmail.com",
-    "password": "123456",
-    "role": "admin", // "admin", "staff", "user"
-    "phone": "05551234567"
-  }
-  ```
+- **Kimlik Doğrulama**
+  - `POST /api/auth/register` - Kullanıcı kaydı
+  - `POST /api/auth/login` - Kullanıcı girişi
 
-- `POST /api/auth/login` - Kullanıcı girişi
-  ```json
-  {
-    "email": "melih@gmail.com",
-    "password": "123456"
-  }
-  ```
-  Yanıt olarak JWT token döner:
-  ```json
-  {
-    "success": true,
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "user": {
-      "id": "67fb722e26b6351b71a858a7",
-      "name": "Melih Canaz",
-      "email": "melih@gmail.com",
-      "role": "admin"
-    }
-  }
-  ```
+- **Kullanıcılar**
+  - `GET /api/users` - Tüm kullanıcıları listele
+  - `GET /api/users/:id` - Belirli bir kullanıcıyı getir
+  - `PUT /api/users/:id` - Kullanıcı bilgilerini güncelle
+  - `DELETE /api/users/:id` - Kullanıcıyı sil
 
-- `GET /api/auth/me` - Mevcut kullanıcı bilgisi
-- `GET /api/auth/logout` - Çıkış yap
+- **Kategoriler**
+  - `GET /api/categories` - Tüm kategorileri listele
+  - `POST /api/categories` - Yeni kategori oluştur
+  - `PUT /api/categories/:id` - Kategori güncelle
+  - `DELETE /api/categories/:id` - Kategori sil
 
-### Kullanıcılar
+- **Ürünler**
+  - `GET /api/products` - Tüm ürünleri listele
+  - `GET /api/products/:id` - Belirli bir ürünü getir
+  - `POST /api/products` - Yeni ürün oluştur
+  - `PUT /api/products/:id` - Ürün güncelle
+  - `DELETE /api/products/:id` - Ürün sil
 
-- `GET /api/users` - Tüm kullanıcıları listele (Admin)
-  - Filtreleme: `?role=staff&active=true&page=1&limit=10`
+- **Masalar**
+  - `GET /api/tables` - Tüm masaları listele
+  - `GET /api/tables/:id` - Belirli bir masayı getir
+  - `POST /api/tables` - Yeni masa oluştur
+  - `PUT /api/tables/:id` - Masa güncelle
+  - `DELETE /api/tables/:id` - Masa sil
 
-- `GET /api/users/:id` - Tek kullanıcı bilgisi (Admin)
+- **Siparişler**
+  - `GET /api/orders` - Tüm siparişleri listele
+  - `GET /api/orders/:id` - Belirli bir siparişi getir
+  - `POST /api/orders` - Yeni sipariş oluştur
+  - `PUT /api/orders/:id` - Sipariş güncelle
+  - `DELETE /api/orders/:id` - Sipariş sil
 
-- `PUT /api/users/:id` - Kullanıcı güncelle (Admin)
-  ```json
-  {
-    "name": "Yeni İsim",
-    "email": "yeni@gmail.com",
-    "role": "staff",
-    "phone": "05559876543",
-    "active": true,
-    "password": "yenisifre" // İsteğe bağlı
-  }
-  ```
+- **Malzemeler**
+  - `GET /api/ingredients` - Tüm malzemeleri listele
+  - `GET /api/ingredients/:id` - Belirli bir malzemeyi getir
+  - `POST /api/ingredients` - Yeni malzeme oluştur
+  - `PUT /api/ingredients/:id` - Malzeme güncelle
+  - `DELETE /api/ingredients/:id` - Malzeme sil
+  - `GET /api/ingredients/low-stock` - Kritik stok seviyesindeki malzemeleri getir
+  - `POST /api/ingredients/:id/stock-entry` - Stok girişi yap
 
-- `DELETE /api/users/:id` - Kullanıcı sil (Admin)
+- **Ürün-Malzeme İlişkisi**
+  - `GET /api/product-ingredients/product/:productId` - Ürünün malzemelerini getir
+  - `GET /api/product-ingredients/ingredient/:ingredientId` - Malzemeyi kullanan ürünleri getir
+  - `POST /api/product-ingredients` - Ürüne malzeme ekle
+  - `PUT /api/product-ingredients/:id` - Ürün-malzeme ilişkisini güncelle
+  - `DELETE /api/product-ingredients/:id` - Ürün-malzeme ilişkisini sil
 
-### Masalar
+- **Stok İşlemleri**
+  - `GET /api/stock/report` - Stok raporu al
+  - `POST /api/stock/check-availability` - Sipariş için stok uygunluğunu kontrol et
+  - `POST /api/stock/update-for-order/:orderId` - Sipariş için stok güncelle
+  - `GET /api/stock/history` - Stok hareketlerini listele
+  - `GET /api/stock/history/:ingredientId` - Belirli bir malzemenin stok geçmişini listele
 
-- `GET /api/tables` - Tüm masaları listele
-  - Filtreleme: `?status=boş&section=iç mekan&active=true`
+## Stok Takip Sistemi
 
-- `GET /api/tables/:id` - Tek masa bilgisi
+### Genel Bakış
 
-- `POST /api/tables` - Yeni masa ekle (Admin)
-  ```json
-  {
-    "number": 1,
-    "name": "Pencere Kenarı 1",
-    "capacity": 4,
-    "section": "iç mekan", // "iç mekan", "dış mekan", "vip", "bar"
-    "status": "boş" // İsteğe bağlı, varsayılan "boş"
-  }
-  ```
+Stok takip sistemi, restoran içindeki malzemelerin stok seviyelerini takip etmek ve sipariş süreçleriyle entegre çalışmak üzere tasarlanmıştır. Sistem şu şekilde çalışır:
 
-- `PUT /api/tables/:id` - Masa güncelle (Admin)
-  ```json
-  {
-    "name": "VIP Masa 1",
-    "capacity": 6,
-    "section": "vip"
-  }
-  ```
+1. **Malzemelerin Tanımlanması**: Her malzeme için ad, birim, maliyet, minimum stok seviyesi gibi bilgiler tanımlanır.
 
-- `DELETE /api/tables/:id` - Masa sil (Admin)
+2. **Ürün-Malzeme İlişkisi**: Menüdeki her ürün için kullanılan malzemeler ve miktarları tanımlanır.
 
-- `PATCH /api/tables/:id/status` - Masa durumunu güncelle (Personel)
-  ```json
-  {
-    "status": "dolu" // "boş", "dolu", "rezervasyonlu", "bakımda"
-  }
-  ```
+3. **Otomatik Stok Düşümü**: Siparişler tamamlandığında, siparişteki ürünlerin malzeme ihtiyaçları hesaplanır ve stoktan otomatik olarak düşülür.
 
-### Kategoriler
+4. **Stok Kontrolleri**: Yeni bir sipariş oluşturulurken, gerekli malzemelerin stokta olup olmadığı kontrol edilebilir.
 
-- `GET /api/categories` - Tüm kategorileri listele
-  - Filtreleme: `?active=true`
+5. **Stok Raporları**: Mevcut stok durumu, kritik stok seviyesindeki malzemeler ve stok hareketleri raporlanabilir.
 
-- `GET /api/categories/:id` - Tek kategori bilgisi
+6. **Bildirimler**: Malzeme stok seviyesi kritik seviyenin altına düştüğünde bildirim gönderilir.
 
-- `POST /api/categories` - Yeni kategori ekle (Admin)
-  ```json
-  {
-    "name": "Ana Yemekler",
-    "description": "Ana yemekler kategorisi",
-    "image": "anayemekler.jpg", // İsteğe bağlı
-    "order": 1 // Sıralama için, isteğe bağlı
-  }
-  ```
+### Kullanım Örneği
 
-- `PUT /api/categories/:id` - Kategori güncelle (Admin)
-  ```json
-  {
-    "name": "Tatlılar",
-    "description": "Tatlılar kategorisi",
-    "active": true
-  }
-  ```
+Örnek bir iş akışı:
 
-- `DELETE /api/categories/:id` - Kategori sil (Admin)
-
-### Ürünler
-
-- `GET /api/products` - Tüm ürünleri listele
-  - Filtreleme: `?category=67fb732726b6351b71a858ab&available=true&featured=true&search=köfte&minPrice=20&maxPrice=100&page=1&limit=10&sort=-createdAt`
-
-- `GET /api/products/:id` - Tek ürün bilgisi
-
-- `POST /api/products` - Yeni ürün ekle (Admin)
-  ```json
-  {
-    "name": "Köfte",
-    "description": "Izgara köfte",
-    "price": 50,
-    "category": "67fb732726b6351b71a858ab", // Kategori ID'si
-    "preparationTime": 15, // Dakika cinsinden
-    "ingredients": [
-      {
-        "name": "Dana kıyma",
-        "optional": false
-      },
-      {
-        "name": "Baharatlar",
-        "optional": false
-      }
-    ],
-    "allergens": ["gluten", "süt"],
-    "available": true,
-    "featured": false,
-    "discount": 0 // Yüzde olarak indirim
-  }
-  ```
-
-- `PUT /api/products/:id` - Ürün güncelle (Admin)
-  ```json
-  {
-    "name": "Özel Köfte",
-    "price": 60,
-    "discount": 10
-  }
-  ```
-
-- `DELETE /api/products/:id` - Ürün sil (Admin)
-
-- `PATCH /api/products/:id/availability` - Ürün durumunu güncelle (Personel)
-  ```json
-  {
-    "available": false // true/false
-  }
-  ```
-
-### Siparişler
-
-- `GET /api/orders` - Tüm siparişleri listele (Personel)
-  - Filtreleme: `?status=beklemede&paymentStatus=beklemede&orderType=masa&table=67fb74e426b6351b71a858c1&customer=67fb722e26b6351b71a858a7&startDate=2025-04-01&endDate=2025-04-30&page=1&limit=10`
-
-- `GET /api/orders/:id` - Tek sipariş bilgisi
-
-- `POST /api/orders` - Yeni sipariş oluştur
-  ```json
-  {
-    "table": "67fb74e426b6351b71a858c1", // Masa ID'si (masa siparişi için)
-    "items": [
-      {
-        "product": "67fb73bc26b6351b71a858b0", // Ürün ID'si
-        "quantity": 2,
-        "notes": "Az baharatlı"
-      }
-    ],
-    "orderType": "masa", // "masa", "paket", "gel-al"
-    "specialRequests": "Hızlı servis",
-    "deliveryAddress": { // Paket sipariş için
-      "address": "Örnek Mah. 123 Sk. No:45",
-      "city": "İstanbul",
-      "postalCode": "34100",
-      "phone": "05551234567"
-    }
-  }
-  ```
-
-- `PUT /api/orders/:id` - Sipariş güncelle (Personel)
-  ```json
-  {
-    "status": "tamamlandı", // "beklemede", "onaylandı", "hazırlanıyor", "tamamlandı", "iptal edildi"
-    "paymentStatus": "ödendi", // "beklemede", "kısmi ödeme", "ödendi", "iptal"
-    "paymentMethod": "kredi kartı", // "nakit", "kredi kartı", "havale", "diğer"
-    "items": [
-      {
-        "product": "67fb73bc26b6351b71a858b0",
-        "quantity": 3,
-        "notes": "Acılı olsun",
-        "status": "hazırlanıyor" // "beklemede", "hazırlanıyor", "hazır", "servis edildi", "iptal"
-      }
-    ]
-  }
-  ```
-  
-  **Not**: Sipariş "tamamlandı" veya "iptal edildi" olarak işaretlendiğinde, ilgili masa otomatik olarak "boş" durumuna güncellenir.
-
-- `DELETE /api/orders/:id` - Sipariş sil (Admin)
-
-## Veri Modelleri
-
-### Kullanıcı (User)
-```javascript
-{
-  name: String, // Zorunlu
-  email: String, // Zorunlu, benzersiz
-  password: String, // Zorunlu, min 6 karakter
-  role: String, // "user", "staff", "admin"
-  phone: String,
-  active: Boolean // true/false
-}
-```
-
-### Masa (Table)
-```javascript
-{
-  number: Number, // Zorunlu, benzersiz
-  name: String, // Zorunlu
-  capacity: Number, // Zorunlu, min 1
-  status: String, // "boş", "dolu", "rezervasyonlu", "bakımda"
-  section: String, // "iç mekan", "dış mekan", "vip", "bar"
-  currentOrder: ObjectId, // Masa üzerindeki aktif sipariş
-  active: Boolean, // true/false
-  qrCode: String
-}
-```
-
-### Kategori (Category)
-```javascript
-{
-  name: String, // Zorunlu, benzersiz
-  description: String,
-  image: String,
-  active: Boolean, // true/false
-  order: Number // Sıralama için
-}
-```
-
-### Ürün (Product)
-```javascript
-{
-  name: String, // Zorunlu
-  description: String,
-  price: Number, // Zorunlu, min 0
-  image: String,
-  category: ObjectId, // Zorunlu, Category referansı
-  preparationTime: Number, // Dakika cinsinden
-  ingredients: [
-    {
-      name: String, // Zorunlu
-      optional: Boolean // true/false
-    }
-  ],
-  allergens: [String],
-  available: Boolean, // true/false
-  featured: Boolean, // true/false
-  discount: Number // Yüzde olarak, 0-100 arası
-}
-```
-
-### Sipariş (Order)
-```javascript
-{
-  table: ObjectId, // Table referansı
-  customer: ObjectId, // User referansı
-  items: [
-    {
-      product: ObjectId, // Zorunlu, Product referansı
-      quantity: Number, // Zorunlu, min 1
-      price: Number, // Zorunlu
-      notes: String,
-      status: String // "beklemede", "hazırlanıyor", "hazır", "servis edildi", "iptal"
-    }
-  ],
-  totalAmount: Number, // Zorunlu
-  status: String, // "beklemede", "onaylandı", "hazırlanıyor", "tamamlandı", "iptal edildi"
-  paymentStatus: String, // "beklemede", "kısmi ödeme", "ödendi", "iptal"
-  paymentMethod: String, // "nakit", "kredi kartı", "havale", "diğer"
-  specialRequests: String,
-  orderType: String, // "masa", "paket", "gel-al"
-  deliveryAddress: {
-    address: String,
-    city: String,
-    postalCode: String,
-    phone: String
-  },
-  staff: ObjectId // User referansı
-}
-```
-
-## Postman'da API Testleri
-
-### Adım 1: Kullanıcı Kaydı ve Giriş
-1. **Kullanıcı Kaydı**:
-   - POST `http://localhost:5000/api/auth/register`
-   - Body: Yukarıda gösterilen kullanıcı modeli
-
-2. **Kullanıcı Girişi**:
-   - POST `http://localhost:5000/api/auth/login`
-   - Body: `{ "email": "...", "password": "..." }`
-   - Dönen token'ı kaydedin!
-
-3. **Auth Header Ayarı**:
-   - Postman'de Authorization sekmesi
-   - Type: Bearer Token
-   - Token: Login'den gelen token
-
-### Adım 2: Kategori ve Ürün İşlemleri
-1. **Kategori Oluşturma**:
-   - POST `http://localhost:5000/api/categories`
-   - Body: Yukarıda gösterilen kategori modeli
-
-2. **Ürün Oluşturma**:
-   - POST `http://localhost:5000/api/products`
-   - Body: Yukarıda gösterilen ürün modeli
-
-### Adım 3: Masa ve Sipariş İşlemleri
-1. **Masa Oluşturma**:
-   - POST `http://localhost:5000/api/tables`
-   - Body: Yukarıda gösterilen masa modeli
-
-2. **Sipariş Oluşturma**:
-   - POST `http://localhost:5000/api/orders`
-   - Body: Yukarıda gösterilen sipariş modeli
-
-3. **Sipariş Durumu Güncelleme**:
-   - PUT `http://localhost:5000/api/orders/:id`
-   - Body: `{ "status": "tamamlandı", "paymentStatus": "ödendi" }`
-
-## Teknolojiler
-
-- **Node.js**: Sunucu tarafı çalışma ortamı
-- **Express**: Web framework
-- **MongoDB**: Veritabanı
-- **Mongoose**: MongoDB ODM
-- **JWT**: Kullanıcı kimlik doğrulama
-- **Bcrypt**: Şifre hashleme
+1. Sistem yöneticisi, "Dana Kıyma" malzemesini 5kg stok ile tanımlar.
+2. "Köfte" ürününe, her porsiyon için 200g "Dana Kıyma" kullanımı tanımlanır.
+3. Müşteri 2 porsiyon köfte sipariş eder ve sipariş tamamlanır.
+4. Sistem otomatik olarak 400g "Dana Kıyma" stoktan düşer (2 porsiyon × 200g).
+5. Kalan stok miktarı 4.6kg olarak güncellenir.
+6. Eğer stok kritik seviyenin altına düşerse, ilgili personele bildirim gönderilir.
 
 ## Lisans
 
 MIT
+
+## İletişim
+
+Melih Canaz - mcanaz1234@gmail.com

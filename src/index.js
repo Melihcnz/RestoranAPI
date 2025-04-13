@@ -16,6 +16,9 @@ const tableRoutes = require('./routes/table');
 const orderRoutes = require('./routes/order');
 const categoryRoutes = require('./routes/category');
 const productRoutes = require('./routes/product');
+const ingredientRoutes = require('./routes/ingredient');
+const productIngredientRoutes = require('./routes/productIngredient');
+const stockRoutes = require('./routes/stock');
 
 const app = express();
 
@@ -82,6 +85,12 @@ app.get('/', (req, res) => {
         <div class="endpoint">
           <code>GET /api/categories</code> - Tüm kategorileri listele
         </div>
+        <div class="endpoint">
+          <code>GET /api/ingredients</code> - Tüm malzemeleri listele
+        </div>
+        <div class="endpoint">
+          <code>GET /api/stock/report</code> - Stok raporu
+        </div>
         
         <h2>Daha Fazla Bilgi</h2>
         <p>Tüm API dokümantasyonu ve detaylı açıklamalar için GitHub repo'muzu ziyaret edin.</p>
@@ -99,6 +108,9 @@ app.use('/api/tables', tableRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/ingredients', ingredientRoutes);
+app.use('/api/product-ingredients', productIngredientRoutes);
+app.use('/api/stock', stockRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

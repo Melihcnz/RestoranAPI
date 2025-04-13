@@ -75,6 +75,24 @@ const orderSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     },
+    statusHistory: {
+      type: [{
+        status: {
+          type: String,
+          required: true,
+          enum: ['beklemede', 'onaylandı', 'hazırlanıyor', 'tamamlandı', 'iptal edildi']
+        },
+        timestamp: {
+          type: Date,
+          default: Date.now
+        },
+        user: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User'
+        }
+      }],
+      default: []
+    },
   },
   { timestamps: true }
 );

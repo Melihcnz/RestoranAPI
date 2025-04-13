@@ -1,6 +1,7 @@
 const Order = require('../models/order');
 const Table = require('../models/table');
 const Product = require('../models/product');
+const stockService = require('../services/stockService');
 
 // @desc    Tüm siparişleri getir
 // @route   GET /api/orders
@@ -308,6 +309,21 @@ exports.updateOrder = async (req, res) => {
       updates.totalAmount = order.calculateTotalAmount();
     }
     
+    // Order status changes
+    if (status && status !== order.status) {
+      // statusHistory null veya undefined olabilir, kontrol edelim
+      const currentHistory = Array.isArray(order.statusHistory) ? order.statusHistory : [];
+      
+      updates.statusHistory = [
+        ...currentHistory,
+        {
+          status,
+          timestamp: Date.now(),
+          user: req.user.id,
+        },
+      ];
+    }
+    
     // Siparişi güncelle
     order = await Order.findByIdAndUpdate(req.params.id, updates, {
       new: true,
@@ -325,6 +341,22 @@ exports.updateOrder = async (req, res) => {
         status: 'boş',
         currentOrder: null,
       });
+    }
+    
+    // Sipariş tamamlandıysa stok güncellemesi yap
+    if (status === 'tamamlandı') {
+      try {
+        await stockService.updateStockForCompletedOrder(order._id, req.user.id);
+      } catch (stockError) {
+        console.error('Stok güncelleme hatası:', stockError);
+        
+        // Stok hatası olsa bile siparişi güncelle ama uyarı ver
+        return res.status(200).json({
+          success: true,
+          data: order,
+          warning: 'Sipariş güncellendi ancak stok güncellemesi sırasında hata oluştu: ' + stockError.message
+        });
+      }
     }
     
     res.status(200).json({

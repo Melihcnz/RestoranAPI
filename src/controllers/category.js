@@ -6,8 +6,8 @@ const Product = require('../models/product');
 // @access  Public
 exports.getAllCategories = async (req, res) => {
   try {
-    // Filtreleme
-    let query = {};
+    // Filtreleme - firma filtresini ekle
+    let query = { ...req.companyFilter };
     
     if (req.query.active !== undefined) {
       query.active = req.query.active === 'true';
@@ -35,7 +35,10 @@ exports.getAllCategories = async (req, res) => {
 // @access  Public
 exports.getCategory = async (req, res) => {
   try {
-    const category = await Category.findById(req.params.id);
+    // Firma filtresini ekle
+    const query = { _id: req.params.id, ...req.companyFilter };
+    
+    const category = await Category.findOne(query);
     
     if (!category) {
       return res.status(404).json({
@@ -62,6 +65,11 @@ exports.getCategory = async (req, res) => {
 // @access  Private/Admin
 exports.createCategory = async (req, res) => {
   try {
+    // Firma bilgisini ekle
+    if (req.user && req.user.company) {
+      req.body.company = req.user.company;
+    }
+    
     const category = await Category.create(req.body);
     
     res.status(201).json({
@@ -82,8 +90,11 @@ exports.createCategory = async (req, res) => {
 // @access  Private/Admin
 exports.updateCategory = async (req, res) => {
   try {
-    const category = await Category.findByIdAndUpdate(
-      req.params.id,
+    // Firma filtresini ekle
+    const query = { _id: req.params.id, ...req.companyFilter };
+    
+    const category = await Category.findOneAndUpdate(
+      query,
       req.body,
       { new: true, runValidators: true }
     );
@@ -113,7 +124,10 @@ exports.updateCategory = async (req, res) => {
 // @access  Private/Admin
 exports.deleteCategory = async (req, res) => {
   try {
-    const category = await Category.findById(req.params.id);
+    // Firma filtresini ekle
+    const query = { _id: req.params.id, ...req.companyFilter };
+    
+    const category = await Category.findOne(query);
     
     if (!category) {
       return res.status(404).json({
@@ -122,8 +136,11 @@ exports.deleteCategory = async (req, res) => {
       });
     }
     
-    // Kategoride ürün varsa silme
-    const productCount = await Product.countDocuments({ category: req.params.id });
+    // Kategoride ürün varsa silme - firma filtresini ekle
+    const productCount = await Product.countDocuments({ 
+      category: req.params.id,
+      ...req.companyFilter 
+    });
     
     if (productCount > 0) {
       return res.status(400).json({

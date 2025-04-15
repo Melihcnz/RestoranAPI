@@ -49,6 +49,11 @@ const ingredientSchema = new mongoose.Schema(
     active: {
       type: Boolean,
       default: true
+    },
+    company: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Company',
+      required: false // Geriye dönük uyumluluk için false
     }
   }, 
   { timestamps: true }

@@ -5,6 +5,7 @@ Restoran yönetim sistemi için geliştirilmiş kapsamlı bir REST API.
 ## Özellikler
 
 - **Kullanıcı Yönetimi**: Kayıt, giriş, rol tabanlı yetkilendirme
+- **Çoklu Firma Desteği**: Her firma için izole edilmiş veriler ve kullanıcılar
 - **Masa Yönetimi**: Masaları ekleme, düzenleme, durum takibi
 - **Menü Yönetimi**: Kategoriler, ürünler, fiyatlar
 - **Sipariş Yönetimi**: Sipariş oluşturma, takip, güncelleme
@@ -92,6 +93,21 @@ CORS_ORIGIN=*
 > - Gerçek ortama geçerken `JWT_SECRET` değerini karmaşık ve güvenli bir değer ile değiştirin.
 > - MongoDB Atlas kullanıyorsanız, `username`, `password` ve `clustername` değerlerini kendi bilgilerinizle değiştirin.
 
+## Çoklu Firma Yapısı
+
+Bu API, çoklu firma (multi-tenant) mimarisi ile tasarlanmıştır. Bu yapı şunları sağlar:
+
+- Her firma kendi veri tabanında izole edilmiş şekilde çalışır
+- Kullanıcılar belirli bir firmaya atanır ve sadece kendi firmasının verilerine erişebilir
+- Süper yöneticiler tüm firmaların verilerini yönetebilir
+
+### Firma Yapısı Özellikleri
+
+- **Kullanıcı-Firma İlişkisi**: Her kullanıcı bir firmaya bağlıdır
+- **Veri İzolasyonu**: Kategoriler, ürünler, masalar, siparişler, malzemeler ve stok verileri firma bazında ayrılmıştır
+- **Rol Tabanlı Erişim**: Firma içinde farklı roller (admin, personel, kullanıcı) tanımlanabilir
+- **Merkezi Yönetim**: Süper yöneticiler tüm firmaları ve kullanıcılarını yönetebilir
+
 ## API Dökümantasyonu
 
 ### Ana Endpointler
@@ -99,6 +115,12 @@ CORS_ORIGIN=*
 - **Kimlik Doğrulama**
   - `POST /api/auth/register` - Kullanıcı kaydı
   - `POST /api/auth/login` - Kullanıcı girişi
+
+- **Firmalar**
+  - `GET /api/companies` - Tüm firmaları listele (süper admin)
+  - `POST /api/companies` - Yeni firma oluştur (süper admin)
+  - `PUT /api/companies/:id` - Firma bilgilerini güncelle
+  - `DELETE /api/companies/:id` - Firmayı sil
 
 - **Kullanıcılar**
   - `GET /api/users` - Tüm kullanıcıları listele

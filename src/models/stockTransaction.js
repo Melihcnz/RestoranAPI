@@ -39,6 +39,11 @@ const stockTransactionSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'User',
     required: true
+  },
+  company: {
+    type: Schema.Types.ObjectId,
+    ref: 'Company',
+    required: false // Geriye dönük uyumluluk için false
   }
 }, { timestamps: true });
 

@@ -245,14 +245,18 @@ exports.updateIngredientStock = async (id, quantity, type, userId, options = {})
 };
 
 /**
- * Malzeme stok geçmişini getirir
- * @param {String} id Malzeme ID'si
+ * Malzeme stok geçmişini döndürür
+ * @param {String} id Malzeme ID
  * @param {Object} query Sorgu parametreleri
+ * @param {Object} companyFilter Firma filtresi
  * @returns {Object} Stok geçmişi
  */
-exports.getIngredientStockHistory = async (id, query = {}) => {
+exports.getIngredientStockHistory = async (id, query = {}, companyFilter = {}) => {
   try {
-    let findQuery = { ingredient: id };
+    let findQuery = { 
+      ingredient: id,
+      ...companyFilter // Firma filtresini ekle
+    };
     
     // Tarih aralığı filtresi
     if (query.startDate && query.endDate) {

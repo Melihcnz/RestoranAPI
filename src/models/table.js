@@ -40,6 +40,11 @@ const tableSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    company: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Company',
+      required: false, // Geriye dönük uyumluluk için false
+    },
   },
   { timestamps: true }
 );

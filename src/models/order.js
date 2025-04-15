@@ -93,6 +93,11 @@ const orderSchema = new mongoose.Schema(
       }],
       default: []
     },
+    company: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Company',
+      required: false, // Geriye dönük uyumluluk için false
+    },
   },
   { timestamps: true }
 );

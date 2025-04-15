@@ -8,11 +8,13 @@ const {
   updateTableStatus,
 } = require('../controllers/table');
 const { protect, admin, staff } = require('../middlewares/auth');
+const companyFilter = require('../middlewares/companyFilter');
 
 const router = express.Router();
 
 // Tüm rotalar için kimlik doğrulama gerekli
 router.use(protect);
+router.use(companyFilter); // Firma filtresini ekle
 
 router.route('/')
   .get(getAllTables)

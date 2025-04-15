@@ -56,6 +56,11 @@ const productSchema = new mongoose.Schema(
       min: 0,
       max: 100,
     },
+    company: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Company',
+      required: false, // Geriye dönük uyumluluk için false
+    },
   },
   { timestamps: true }
 );

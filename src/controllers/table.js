@@ -7,7 +7,7 @@ const Order = require('../models/order');
 exports.getAllTables = async (req, res) => {
   try {
     // Filtreleme
-    let query = {};
+    let query = { ...req.companyFilter };
     
     if (req.query.status) {
       query.status = req.query.status;
@@ -45,7 +45,13 @@ exports.getAllTables = async (req, res) => {
 // @access  Private
 exports.getTable = async (req, res) => {
   try {
-    const table = await Table.findById(req.params.id).populate('currentOrder');
+    // Firma filteresi ekle
+    const query = {
+      _id: req.params.id,
+      ...req.companyFilter
+    };
+    
+    const table = await Table.findOne(query).populate('currentOrder');
     
     if (!table) {
       return res.status(404).json({
@@ -80,6 +86,11 @@ exports.createTable = async (req, res) => {
         success: false,
         message: 'Bu masa numarası zaten kullanılıyor',
       });
+    }
+    
+    // Firma bilgisini ekle
+    if (req.user && req.user.company) {
+      req.body.company = req.user.company;
     }
     
     const table = await Table.create(req.body);

@@ -7,7 +7,7 @@ const Category = require('../models/category');
 exports.getAllProducts = async (req, res) => {
   try {
     // Filtreleme
-    let query = {};
+    let query = { ...req.companyFilter }; // Firma filtresini ekle
     
     if (req.query.category) {
       query.category = req.query.category;
@@ -79,7 +79,10 @@ exports.getAllProducts = async (req, res) => {
 // @access  Public
 exports.getProduct = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id).populate('category', 'name');
+    // Firma filtresini ekle
+    const query = { _id: req.params.id, ...req.companyFilter };
+    
+    const product = await Product.findOne(query).populate('category', 'name');
     
     if (!product) {
       return res.status(404).json({
@@ -107,13 +110,21 @@ exports.getProduct = async (req, res) => {
 exports.createProduct = async (req, res) => {
   try {
     // Kategori kontrolü
-    const categoryExists = await Category.findById(req.body.category);
+    const categoryExists = await Category.findOne({ 
+      _id: req.body.category,
+      ...req.companyFilter 
+    });
     
     if (!categoryExists) {
       return res.status(404).json({
         success: false,
         message: 'Kategori bulunamadı',
       });
+    }
+    
+    // Firma bilgisini ekle
+    if (req.user && req.user.company) {
+      req.body.company = req.user.company;
     }
     
     const product = await Product.create(req.body);
@@ -138,7 +149,10 @@ exports.updateProduct = async (req, res) => {
   try {
     // Kategori değişiyorsa kontrolü yap
     if (req.body.category) {
-      const categoryExists = await Category.findById(req.body.category);
+      const categoryExists = await Category.findOne({ 
+        _id: req.body.category,
+        ...req.companyFilter
+      });
       
       if (!categoryExists) {
         return res.status(404).json({
@@ -148,7 +162,10 @@ exports.updateProduct = async (req, res) => {
       }
     }
     
-    let product = await Product.findById(req.params.id);
+    // Firma filtresini ekle
+    const query = { _id: req.params.id, ...req.companyFilter };
+    
+    let product = await Product.findOne(query);
     
     if (!product) {
       return res.status(404).json({
@@ -157,7 +174,7 @@ exports.updateProduct = async (req, res) => {
       });
     }
     
-    product = await Product.findByIdAndUpdate(req.params.id, req.body, {
+    product = await Product.findOneAndUpdate(query, req.body, {
       new: true,
       runValidators: true,
     }).populate('category', 'name');
@@ -180,7 +197,10 @@ exports.updateProduct = async (req, res) => {
 // @access  Private/Admin
 exports.deleteProduct = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    // Firma filtresini ekle
+    const query = { _id: req.params.id, ...req.companyFilter };
+    
+    const product = await Product.findOne(query);
     
     if (!product) {
       return res.status(404).json({
@@ -218,8 +238,11 @@ exports.updateProductAvailability = async (req, res) => {
       });
     }
     
-    const product = await Product.findByIdAndUpdate(
-      req.params.id,
+    // Firma filtresini ekle
+    const query = { _id: req.params.id, ...req.companyFilter };
+    
+    const product = await Product.findOneAndUpdate(
+      query,
       { available },
       { new: true, runValidators: true }
     ).populate('category', 'name');

@@ -1,11 +1,12 @@
 const User = require('../models/user');
+const Company = require('../models/company');
 
 // @desc    Kullanıcı kaydı
 // @route   POST /api/auth/register
 // @access  Public
 exports.register = async (req, res) => {
   try {
-    const { name, email, password, role, phone } = req.body;
+    const { name, email, password, role, phone, companyId, createCompany } = req.body;
 
     // Email kullanımda mı kontrolü
     const userExists = await User.findOne({ email });
@@ -17,6 +18,31 @@ exports.register = async (req, res) => {
       });
     }
 
+    // Firma bilgisi işleme
+    let company = null;
+
+    // CompanyId gönderilmişse, firmayı bul
+    if (companyId) {
+      company = await Company.findById(companyId);
+      
+      if (!company) {
+        return res.status(400).json({
+          success: false,
+          message: 'Belirtilen firma bulunamadı',
+        });
+      }
+    } 
+    // Yeni firma oluşturma isteği varsa
+    else if (createCompany && req.body.companyName) {
+      // Yeni firma oluştur
+      company = await Company.create({
+        name: req.body.companyName,
+        contactEmail: email,
+        contactPhone: phone || '',
+        address: req.body.companyAddress || '',
+      });
+    }
+
     // Kullanıcı oluşturma
     const user = await User.create({
       name,
@@ -24,6 +50,7 @@ exports.register = async (req, res) => {
       password,
       role: role || 'user',
       phone,
+      company: company ? company._id : undefined,
     });
 
     sendTokenResponse(user, 201, res);
@@ -52,7 +79,7 @@ exports.login = async (req, res) => {
     }
 
     // Kullanıcıyı şifresiyle birlikte bul
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ email }).select('+password').populate('company', 'name');
 
     if (!user) {
       return res.status(401).json({
@@ -94,7 +121,7 @@ exports.login = async (req, res) => {
 // @access  Private
 exports.getMe = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id).populate('company', 'name');
 
     res.status(200).json({
       success: true,
@@ -141,6 +168,7 @@ const sendTokenResponse = (user, statusCode, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      company: user.company,
     },
   });
 }; 

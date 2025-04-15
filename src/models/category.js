@@ -24,6 +24,11 @@ const categorySchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    company: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Company',
+      required: false, // Geriye dönük uyumluluk için false
+    },
   },
   { timestamps: true }
 );

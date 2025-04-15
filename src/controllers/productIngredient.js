@@ -7,7 +7,12 @@ const Ingredient = require('../models/ingredient');
 // @access  Private/Staff
 exports.getIngredientsByProduct = async (req, res) => {
   try {
-    const productIngredients = await ProductIngredient.find({ product: req.params.productId })
+    const query = { 
+      product: req.params.productId,
+      ...req.companyFilter // Firma filtresini ekle
+    };
+    
+    const productIngredients = await ProductIngredient.find(query)
       .populate('ingredient', 'name currentStock unit minStockLevel category')
       .populate('product', 'name');
     
@@ -30,7 +35,12 @@ exports.getIngredientsByProduct = async (req, res) => {
 // @access  Private/Staff
 exports.getProductsByIngredient = async (req, res) => {
   try {
-    const productIngredients = await ProductIngredient.find({ ingredient: req.params.ingredientId })
+    const query = { 
+      ingredient: req.params.ingredientId,
+      ...req.companyFilter // Firma filtresini ekle
+    };
+    
+    const productIngredients = await ProductIngredient.find(query)
       .populate('product', 'name price category')
       .populate('ingredient', 'name');
     
@@ -89,7 +99,8 @@ exports.createProductIngredient = async (req, res) => {
       quantity,
       unit,
       isOptional,
-      notes
+      notes,
+      company: req.user.company
     });
     
     res.status(201).json({

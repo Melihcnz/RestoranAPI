@@ -8,7 +8,7 @@ const ProductIngredient = require('../models/productIngredient');
 exports.getAllIngredients = async (req, res) => {
   try {
     // Filtreleme
-    let query = {};
+    let query = { ...req.companyFilter }; // Firma filtresini ekle
     
     if (req.query.category) {
       query.category = req.query.category;
@@ -67,7 +67,13 @@ exports.getAllIngredients = async (req, res) => {
 // @access  Private/Staff
 exports.getIngredient = async (req, res) => {
   try {
-    const ingredient = await Ingredient.findById(req.params.id)
+    // Firma filtresini ekle
+    const query = {
+      _id: req.params.id,
+      ...req.companyFilter
+    };
+    
+    const ingredient = await Ingredient.findOne(query)
       .populate('supplier', 'name contactPerson phone');
     
     if (!ingredient) {
@@ -95,6 +101,11 @@ exports.getIngredient = async (req, res) => {
 // @access  Private/Admin
 exports.createIngredient = async (req, res) => {
   try {
+    // Firma bilgisini ekle
+    if (req.user && req.user.company) {
+      req.body.company = req.user.company;
+    }
+    
     const ingredient = await Ingredient.create(req.body);
     
     res.status(201).json({
@@ -115,8 +126,14 @@ exports.createIngredient = async (req, res) => {
 // @access  Private/Admin
 exports.updateIngredient = async (req, res) => {
   try {
-    const ingredient = await Ingredient.findByIdAndUpdate(
-      req.params.id,
+    // Firma filtresini ekle
+    const query = {
+      _id: req.params.id,
+      ...req.companyFilter
+    };
+    
+    const ingredient = await Ingredient.findOneAndUpdate(
+      query,
       req.body,
       { new: true, runValidators: true }
     );
@@ -146,7 +163,13 @@ exports.updateIngredient = async (req, res) => {
 // @access  Private/Admin
 exports.deleteIngredient = async (req, res) => {
   try {
-    const ingredient = await Ingredient.findById(req.params.id);
+    // Firma filtresini ekle
+    const query = {
+      _id: req.params.id,
+      ...req.companyFilter
+    };
+    
+    const ingredient = await Ingredient.findOne(query);
     
     if (!ingredient) {
       return res.status(404).json({
@@ -156,7 +179,10 @@ exports.deleteIngredient = async (req, res) => {
     }
     
     // Bu malzemeyle ilişkili ürün var mı kontrol et
-    const productIngredientCount = await ProductIngredient.countDocuments({ ingredient: req.params.id });
+    const productIngredientCount = await ProductIngredient.countDocuments({ 
+      ingredient: req.params.id,
+      ...req.companyFilter
+    });
     
     if (productIngredientCount > 0) {
       return res.status(400).json({
@@ -187,7 +213,13 @@ exports.addStockEntry = async (req, res) => {
   try {
     const { quantity, unitCost, supplier, notes } = req.body;
     
-    const ingredient = await Ingredient.findById(req.params.id);
+    // Firma filtresini ekle
+    const query = {
+      _id: req.params.id,
+      ...req.companyFilter
+    };
+    
+    const ingredient = await Ingredient.findOne(query);
     
     if (!ingredient) {
       return res.status(404).json({
@@ -220,7 +252,8 @@ exports.addStockEntry = async (req, res) => {
       totalCost,
       supplier,
       notes,
-      performedBy: req.user.id
+      performedBy: req.user.id,
+      company: req.user.company // Firma bilgisini ekle
     });
     
     res.status(201).json({
@@ -241,9 +274,13 @@ exports.addStockEntry = async (req, res) => {
 // @access  Private/Staff
 exports.getLowStockIngredients = async (req, res) => {
   try {
-    const ingredients = await Ingredient.find({
-      $expr: { $lte: ['$currentStock', '$minStockLevel'] }
-    }).populate('supplier', 'name contactPerson phone');
+    const query = {
+      $expr: { $lte: ['$currentStock', '$minStockLevel'] },
+      ...req.companyFilter // Firma filtresini ekle
+    };
+    
+    const ingredients = await Ingredient.find(query)
+      .populate('supplier', 'name contactPerson phone');
     
     res.status(200).json({
       success: true,

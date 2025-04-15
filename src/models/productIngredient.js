@@ -28,6 +28,11 @@ const productIngredientSchema = new mongoose.Schema({
   notes: {
     type: String,
     trim: true
+  },
+  company: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Company',
+    required: false // Geriye dönük uyumluluk için false
   }
 }, { timestamps: true });
 

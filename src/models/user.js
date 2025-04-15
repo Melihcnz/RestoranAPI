@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ['user', 'staff', 'admin'],
+      enum: ['user', 'staff', 'admin', 'superadmin'],
       default: 'user',
     },
     phone: {
@@ -39,6 +39,11 @@ const userSchema = new mongoose.Schema(
     active: {
       type: Boolean,
       default: true,
+    },
+    company: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Company',
+      required: false, // Geriye dönük uyumluluk için false, yeni kullanıcılarda zorunlu olacak
     },
   },
   { timestamps: true }

@@ -19,6 +19,7 @@ const productRoutes = require('./routes/product');
 const ingredientRoutes = require('./routes/ingredient');
 const productIngredientRoutes = require('./routes/productIngredient');
 const stockRoutes = require('./routes/stock');
+const companyRoutes = require('./routes/company');
 
 const app = express();
 
@@ -80,7 +81,7 @@ app.get('/', (req, res) => {
           <code>POST /api/auth/login</code> - Kullanıcı girişi
         </div>
         <div class="endpoint">
-          <code>GET /api/products</code> - Tüm ürünleri listele
+          <code>GET /api/products</code> - Tüm ürünleri listele (kimlik doğrulaması gerekli)
         </div>
         <div class="endpoint">
           <code>GET /api/categories</code> - Tüm kategorileri listele
@@ -90,6 +91,9 @@ app.get('/', (req, res) => {
         </div>
         <div class="endpoint">
           <code>GET /api/stock/report</code> - Stok raporu
+        </div>
+        <div class="endpoint">
+          <code>POST /api/companies</code> - Yeni firma oluştur (Süper Admin)
         </div>
         
         <h2>Daha Fazla Bilgi</h2>
@@ -111,6 +115,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/ingredients', ingredientRoutes);
 app.use('/api/product-ingredients', productIngredientRoutes);
 app.use('/api/stock', stockRoutes);
+app.use('/api/companies', companyRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

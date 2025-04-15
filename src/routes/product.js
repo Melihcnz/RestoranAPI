@@ -8,15 +8,17 @@ const {
   updateProductAvailability,
 } = require('../controllers/product');
 const { protect, admin, staff } = require('../middlewares/auth');
+const companyFilter = require('../middlewares/companyFilter');
 
 const router = express.Router();
 
-// Herkese açık rotalar
+// Tüm rotalar için kimlik doğrulama ve firma filtresi gerekli
+router.use(protect);
+router.use(companyFilter);
+
+// Genel erişim rotaları (kimlik doğrulaması ile)
 router.get('/', getAllProducts);
 router.get('/:id', getProduct);
-
-// Korumalı rotalar
-router.use(protect);
 
 // Staff rotaları
 router.patch('/:id/availability', staff, updateProductAvailability);

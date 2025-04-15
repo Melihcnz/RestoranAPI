@@ -77,7 +77,8 @@ exports.updateStockForCompletedOrder = async (orderId, userId) => {
           newStock,
           orderId,
           notes: `Sipariş #${order._id} tamamlandı`,
-          performedBy: userId
+          performedBy: userId,
+          company: order.company
         }], { session });
         
         // Düşük stok kontrolü
@@ -176,11 +177,12 @@ exports.checkStockAvailability = async (orderItems) => {
 /**
  * Stok raporu oluşturur
  * @param {Object} filters Filtreler
+ * @param {Object} companyFilter Firma filtresi 
  * @returns {Object} Stok raporu
  */
-exports.getStockReport = async (filters = {}) => {
+exports.getStockReport = async (filters = {}, companyFilter = {}) => {
   try {
-    let query = {};
+    let query = { ...companyFilter }; // Firma filtresini ekle
     
     // Kategori filtresi
     if (filters.category) {

@@ -12,7 +12,7 @@ exports.getStockReport = async (req, res) => {
       onlyLowStock: req.query.lowStock === 'true'
     };
     
-    const report = await stockService.getStockReport(filters);
+    const report = await stockService.getStockReport(filters, req.companyFilter);
     
     res.status(200).json({
       success: true,
@@ -101,7 +101,7 @@ exports.getStockHistory = async (req, res) => {
     
     const skip = (query.page - 1) * query.limit;
     
-    let dbQuery = {};
+    let dbQuery = { ...req.companyFilter };
     
     // Tarih aralığına göre filtreleme
     if (query.startDate && query.endDate) {
@@ -162,7 +162,7 @@ exports.getIngredientStockHistory = async (req, res) => {
       type: req.query.type
     };
     
-    const result = await ingredientService.getIngredientStockHistory(ingredientId, query);
+    const result = await ingredientService.getIngredientStockHistory(ingredientId, query, req.companyFilter);
     
     res.status(200).json({
       success: true,

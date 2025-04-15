@@ -9,7 +9,7 @@ const stockService = require('../services/stockService');
 exports.getAllOrders = async (req, res) => {
   try {
     // Filtreleme
-    let query = {};
+    let query = { ...req.companyFilter }; // Firma filtresini ekle
     
     if (req.query.status) {
       query.status = req.query.status;
@@ -88,7 +88,13 @@ exports.getAllOrders = async (req, res) => {
 // @access  Private
 exports.getOrder = async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id)
+    // Firma filteresi ekle
+    const query = {
+      _id: req.params.id,
+      ...req.companyFilter
+    };
+    
+    const order = await Order.findOne(query)
       .populate([
         { path: 'table', select: 'number name section' },
         { path: 'customer', select: 'name email phone' },
@@ -190,6 +196,7 @@ exports.createOrder = async (req, res) => {
       orderType: orderType || 'masa',
       deliveryAddress,
       staff: req.user.role === 'staff' || req.user.role === 'admin' ? req.user.id : null,
+      company: req.user.company // Firma bilgisini ekle
     });
     
     // Toplam tutarı hesapla
